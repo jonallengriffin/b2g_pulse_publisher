@@ -15,7 +15,7 @@ def publish_build(commit):
     publisher = B2GPulsePublisher()
     msg = GenericMessage()
     msg.routing_parts = ['b2g', 'qemu', 'build', 'available']
-    msg.set_data('buildurl', '10.242.30.20/out/qemu_package.tar.gz')
+    msg.set_data('buildurl', 'http://10.242.30.20/out/qemu_package.tar.gz')
     msg.set_data('commit', commit)
     publisher.publish(msg)
 
