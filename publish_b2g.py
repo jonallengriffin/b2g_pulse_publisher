@@ -1,4 +1,6 @@
+import ConfigParser
 import os
+import shutil
 import subprocess
 import sys
 
@@ -11,26 +13,37 @@ class B2GPulsePublisher(GenericPublisher):
         super(B2GPulsePublisher, self).__init__(PulseConfiguration(**kwargs),
                                                 'org.mozilla.exchange.b2g')
 
-def publish_build(commit):
+def publish_build(commit, filename):
     publisher = B2GPulsePublisher()
     msg = GenericMessage()
     msg.routing_parts = ['b2g', 'qemu', 'build', 'available']
-    msg.set_data('buildurl', 'http://10.242.30.20/out/qemu_package.tar.gz')
+    msg.set_data('buildurl', 'http://builder.boot2gecko.org/%s' % os.path.basename(filename))
     msg.set_data('commit', commit)
+    sys.exit(0)
     publisher.publish(msg)
 
 if __name__ == '__main__':
     args = sys.argv[1:]
 
-    if not args:
-        cwd = '.'
+    cfg = ConfigParser.ConfigParser()
+    if args:
+        cfg.read(args[0])
     else:
-        cwd = args[0]
+        cfg.read(os.path.join(os.path.dirname(__file__), 'default.conf'))
+    print 'using config', cfg.items('build')
+
+    repodir = cfg.get('build', 'repo_dir')
+    infile = cfg.get('build', 'in_filename')
+    indir = cfg.get('build', 'in_dir')
+    outfile = cfg.get('build', 'out_filename')
+    outdir = cfg.get('build', 'out_dir')
 
     proc = subprocess.Popen(['git', 'rev-list', '--max-count=1', 'HEAD'],
                             stderr=subprocess.STDOUT, stdout=subprocess.PIPE,
-                            cwd=cwd)
+                            cwd=repodir)
     retcode = proc.wait()
     commit = proc.stdout.read().strip()
-    publish_build(commit)
+    filename = outfile % commit
+    shutil.copyfile(os.path.join(indir, infile), os.path.join(outdir, filename))
+    publish_build(commit, filename)
 
