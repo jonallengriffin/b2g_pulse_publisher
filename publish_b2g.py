@@ -19,7 +19,6 @@ def publish_build(commit, filename):
     msg.routing_parts = ['b2g', 'qemu', 'build', 'available']
     msg.set_data('buildurl', 'http://builder.boot2gecko.org/%s' % os.path.basename(filename))
     msg.set_data('commit', commit)
-    sys.exit(0)
     publisher.publish(msg)
 
 if __name__ == '__main__':
