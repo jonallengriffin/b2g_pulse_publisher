@@ -26,9 +26,9 @@ def clean_old_builds(outdir):
     # delete builds in the output dir > 2 days old
     for afile in os.listdir(outdir):
         stat = os.stat(os.path.join(outdir, afile))
-        if (datetime.datetime.now() - 
+        if (afile.startswith('qemu_package') and (datetime.datetime.now() - 
             datetime.datetime.fromtimestamp(stat.st_mtime) > 
-            datetime.timedelta(days=2)):
+            datetime.timedelta(days=2))):
             print 'removing old file', afile
             os.remove(os.path.join(outdir, afile))
 
